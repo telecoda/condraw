@@ -4,7 +4,7 @@ import termbox "github.com/nsf/termbox-go"
 
 var cursorX, cursorY int
 var brush = '░'
-
+var eraser = ' '
 var brushRunes = []rune{' ', '░', '▒', '▓', '█'}
 
 // Colours
@@ -18,8 +18,8 @@ var cursorRune = ' '
 var cursorFg = termbox.ColorRed
 var cursorBg = termbox.ColorRed
 
-var backbuf []termbox.Cell
-var bbw, bbh int
+//var backbuf []termbox.Cell
+//var bbw, bbh int
 
 type Drawing struct {
 	width, height int
@@ -30,20 +30,45 @@ func NewDrawing(width, height int) *Drawing {
 	drawing := &Drawing{
 		width:  width,
 		height: height,
+		//bbw, bbh = w, h
+		drawBuf: make([]termbox.Cell, width*height),
 	}
 
 	cursorX = 10
 	cursorY = 10
+
+	drawing.defaultDrawing()
+
 	return drawing
 }
 
-func (d *Drawing) render() {
-	copy(termbox.CellBuffer(), backbuf)
+func (d *Drawing) defaultDrawing() {
+
 }
 
-func reallocBackBuffer(w, h int) {
-	bbw, bbh = w, h
-	backbuf = make([]termbox.Cell, w*h)
+func (d *Drawing) render() {
+	termbox.Clear(termbox.ColorWhite, termbox.ColorBlue)
+	//copy(termbox.CellBuffer(), d.drawBuf)
+	// copy from drawing buffer to on screen buffer
+	// dimension may differ..
+	uiWidth, uiHeight := termbox.Size()
+
+	for x := 0; x < uiWidth; x++ {
+		for y := 0; y < uiHeight; y++ {
+			cell := d.GetCell(x, y)
+			if cell != nil {
+				termbox.SetCell(x, y, cell.Ch, cell.Fg, cell.Bg)
+			}
+		}
+	}
+
+}
+
+func (d *Drawing) GetCell(x, y int) *termbox.Cell {
+	if d.inBounds(x, y) {
+		return &d.drawBuf[d.width*y+x]
+	}
+	return nil
 }
 
 func cursorUp() {
@@ -74,10 +99,31 @@ func cursorRight() {
 	cursorX++
 }
 
-func paintAtCursor() {
-	backbuf[bbw*cursorY+cursorX] = termbox.Cell{Ch: brush, Fg: brushFg, Bg: brushBg}
+func (d *Drawing) inBounds(x, y int) bool {
+	// check cursor is on drawing bounds
+	if x >= d.width || y >= d.height {
+		return false
+	}
+
+	if x < 0 || y < 0 {
+		return false
+	}
+
+	return true
 }
 
-func deleteAtCursor() {
-	backbuf[bbw*cursorY+cursorX] = termbox.Cell{Ch: ' ', Fg: brushBg, Bg: brushFg}
+func (d *Drawing) paintAtCursor() {
+	if d.inBounds(cursorX, cursorY) {
+		d.drawBuf[d.width*cursorY+cursorX] = termbox.Cell{Ch: brush, Fg: brushFg, Bg: brushBg}
+	}
+}
+
+func (d *Drawing) eraseAtCursor() {
+	if d.inBounds(cursorX, cursorY) {
+		d.drawBuf[d.width*cursorY+cursorX] = termbox.Cell{Ch: eraser, Fg: brushBg, Bg: brushFg}
+	}
+}
+
+func (d *Drawing) resizeConsole(width, height int) {
+
 }

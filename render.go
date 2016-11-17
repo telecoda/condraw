@@ -37,7 +37,7 @@ func statusBarRenderer() {
 	// bottom of screen
 	_, height := termbox.Size()
 	renderText(fmt.Sprintf("Cursor: %03d,%03d | Size: %03d, %03d | Event: %#v",
-		cursorX, cursorY, drawing.width, drawing.height, lastEvent), 0, height-1, statusBarFg, statusBarBg)
+		cursorX, cursorY, drawing.width, drawing.height, lastMouseEvent), 0, height-1, statusBarFg, statusBarBg)
 }
 
 func menuBarRenderer() {

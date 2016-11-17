@@ -27,5 +27,4 @@ func Init() {
 	drawing = NewDrawing(termWidth, termHeight-2)
 
 	termbox.SetInputMode(termbox.InputEsc | termbox.InputMouse)
-	reallocBackBuffer(termbox.Size())
 }
