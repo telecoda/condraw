@@ -125,13 +125,21 @@ func drawingHandler(ev termbox.Event) {
 		}
 	case termbox.EventMouse:
 		lastMouseEvent = ev
-		// move cursor
-		cursorX, cursorY = ev.MouseX, ev.MouseY
-		if ev.Key == termbox.MouseLeft {
-			drawing.paintAtCursor()
-		}
-		if ev.Key == termbox.MouseRight {
-			drawing.eraseAtCursor()
+		// check if mouse clicked on status bar
+		_, height := termbox.Size()
+		if ev.MouseY == height-1 {
+			// click on status bar
+			statusBar.Handle(ev)
+		} else {
+			// move cursor
+			cursorX, cursorY = ev.MouseX, ev.MouseY
+			// click on drawing
+			if ev.Key == termbox.MouseLeft {
+				drawing.paintAtCursor()
+			}
+			if ev.Key == termbox.MouseRight {
+				drawing.eraseAtCursor()
+			}
 		}
 	}
 

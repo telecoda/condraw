@@ -1,6 +1,6 @@
 package main
 
-import termbox "github.com/nsf/termbox-go"
+import "github.com/telecoda/condraw/ui"
 
 var Menus []*Menu
 var currentMenu int
@@ -27,28 +27,15 @@ func renderMenuBar() {
 	mx := 3
 	my := 0
 	// render solid bar first
-	renderBar('-', 0, menuForeground, menuBackground)
+	ui.RenderBar('-', 0, menuForeground, menuBackground)
 	// overlap menu text on top
 	for idx, menu := range Menus {
 		if idx == currentMenu {
-			renderText(menu.Title, mx, my, menuBackground, menuForeground)
+			ui.RenderText(menu.Title, mx, my, menuBackground, menuForeground)
 		} else {
-			renderText(menu.Title, mx, my, menuForeground, menuBackground)
+			ui.RenderText(menu.Title, mx, my, menuForeground, menuBackground)
 
 		}
 		mx += len(menu.Title) + 2
-	}
-}
-
-func renderBar(r rune, y int, fg, bg termbox.Attribute) {
-	width, _ := termbox.Size()
-	for x := 0; x < width; x++ {
-		termbox.SetCell(x, y, r, fg, bg)
-	}
-}
-
-func renderText(text string, x, y int, fg, bg termbox.Attribute) {
-	for i, rune := range text {
-		termbox.SetCell(x+i, y, rune, fg, bg)
 	}
 }

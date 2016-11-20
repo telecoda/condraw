@@ -3,17 +3,17 @@ package main
 import termbox "github.com/nsf/termbox-go"
 
 var cursorX, cursorY int
-var brush = '░'
 var eraser = ' '
 var brushRunes = []rune{' ', '░', '▒', '▓', '█'}
+var brush = '░'
 
 // Colours
-var brushFg = termbox.ColorBlack
-var brushBg = termbox.ColorWhite
+var brushFg = termbox.ColorBlue
+var brushBg = termbox.ColorRed
 var menuForeground = termbox.ColorBlack
 var menuBackground = termbox.ColorWhite
-var statusBarFg = termbox.ColorWhite
-var statusBarBg = termbox.ColorBlack
+var statusBarFg = termbox.ColorBlack
+var statusBarBg = termbox.ColorWhite
 var cursorRune = ' '
 var cursorFg = termbox.ColorRed
 var cursorBg = termbox.ColorRed
@@ -28,9 +28,8 @@ type Drawing struct {
 
 func NewDrawing(width, height int) *Drawing {
 	drawing := &Drawing{
-		width:  width,
-		height: height,
-		//bbw, bbh = w, h
+		width:   width,
+		height:  height,
 		drawBuf: make([]termbox.Cell, width*height),
 	}
 
@@ -48,13 +47,12 @@ func (d *Drawing) defaultDrawing() {
 
 func (d *Drawing) render() {
 	termbox.Clear(termbox.ColorWhite, termbox.ColorBlue)
-	//copy(termbox.CellBuffer(), d.drawBuf)
 	// copy from drawing buffer to on screen buffer
 	// dimension may differ..
 	uiWidth, uiHeight := termbox.Size()
 
-	for x := 0; x < uiWidth; x++ {
-		for y := 0; y < uiHeight; y++ {
+	for x := 0; x <= uiWidth; x++ {
+		for y := 0; y <= uiHeight; y++ {
 			cell := d.GetCell(x, y)
 			if cell != nil {
 				termbox.SetCell(x, y, cell.Ch, cell.Fg, cell.Bg)
