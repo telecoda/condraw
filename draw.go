@@ -5,11 +5,13 @@ import termbox "github.com/nsf/termbox-go"
 var cursorX, cursorY int
 var eraser = ' '
 var brushRunes = []rune{' ', '░', '▒', '▓', '█'}
-var brush = '░'
+var defaultBrushChar = '░'
+
+var brush *Brush
 
 // Colours
-var brushFg = termbox.ColorBlue
-var brushBg = termbox.ColorRed
+var defaultBrushFg = termbox.ColorRed
+var defaultBrushBg = termbox.ColorBlue
 var menuForeground = termbox.ColorBlack
 var menuBackground = termbox.ColorWhite
 var statusBarFg = termbox.ColorBlack
@@ -108,18 +110,6 @@ func (d *Drawing) inBounds(x, y int) bool {
 	}
 
 	return true
-}
-
-func (d *Drawing) paintAtCursor() {
-	if d.inBounds(cursorX, cursorY) {
-		d.drawBuf[d.width*cursorY+cursorX] = termbox.Cell{Ch: brush, Fg: brushFg, Bg: brushBg}
-	}
-}
-
-func (d *Drawing) eraseAtCursor() {
-	if d.inBounds(cursorX, cursorY) {
-		d.drawBuf[d.width*cursorY+cursorX] = termbox.Cell{Ch: eraser, Fg: brushBg, Bg: brushFg}
-	}
 }
 
 func (d *Drawing) resizeConsole(width, height int) {

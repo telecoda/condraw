@@ -19,9 +19,10 @@ func registerEventHandlers() {
 	handlers = make(map[state]eventHandler)
 
 	handlers[drawState] = drawingHandler
-	handlers[menuBarState] = menuBarHandler
-	handlers[menuState] = menuHandler
-	handlers[dialogState] = dialogHandler
+	handlers[paletteState] = paletteHandler
+	//handlers[menuBarState] = menuBarHandler
+	//handlers[menuState] = menuHandler
+	//handlers[dialogState] = dialogHandler
 }
 
 // setState sets state of app and assigns event handler/renderer
@@ -90,14 +91,14 @@ func drawingHandler(ev termbox.Event) {
 	case termbox.EventKey:
 
 		if ev.Key == termbox.KeyTab {
-			setState(menuBarState)
+			//setState(menuBarState)
 		}
 		if ev.Key == termbox.KeySpace {
-			drawing.paintAtCursor()
+			brush.paintToDrawing(drawing)
 			return
 		}
 		if ev.Key == termbox.KeyDelete || ev.Key == termbox.KeyBackspace || ev.Key == termbox.KeyBackspace2 {
-			drawing.eraseAtCursor()
+			brush.eraseFromDrawing(drawing)
 			return
 		}
 
@@ -105,22 +106,22 @@ func drawingHandler(ev termbox.Event) {
 		case keya:
 			cursorLeft()
 		case keyA:
-			drawing.paintAtCursor()
+			brush.paintToDrawing(drawing)
 			cursorLeft()
 		case keyd:
 			cursorRight()
 		case keyD:
-			drawing.paintAtCursor()
+			brush.paintToDrawing(drawing)
 			cursorRight()
 		case keyw:
 			cursorUp()
 		case keyW:
-			drawing.paintAtCursor()
+			brush.paintToDrawing(drawing)
 			cursorUp()
 		case keys:
 			cursorDown()
 		case keyS:
-			drawing.paintAtCursor()
+			brush.paintToDrawing(drawing)
 			cursorDown()
 		}
 	case termbox.EventMouse:
@@ -135,10 +136,10 @@ func drawingHandler(ev termbox.Event) {
 			cursorX, cursorY = ev.MouseX, ev.MouseY
 			// click on drawing
 			if ev.Key == termbox.MouseLeft {
-				drawing.paintAtCursor()
+				brush.paintToDrawing(drawing)
 			}
 			if ev.Key == termbox.MouseRight {
-				drawing.eraseAtCursor()
+				brush.eraseFromDrawing(drawing)
 			}
 		}
 	}
@@ -160,4 +161,8 @@ func menuHandler(ev termbox.Event) {
 
 func dialogHandler(event termbox.Event) {
 
+}
+
+func paletteHandler(ev termbox.Event) {
+	palette.Handle(ev)
 }

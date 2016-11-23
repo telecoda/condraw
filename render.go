@@ -9,9 +9,10 @@ func registerRenderers() {
 	renderers = make(map[state]renderer)
 
 	renderers[drawState] = drawingRenderer
-	renderers[menuBarState] = menuBarRenderer
-	renderers[menuState] = menuRenderer
-	renderers[dialogState] = dialogRenderer
+	renderers[paletteState] = paletteRenderer
+	//renderers[menuBarState] = menuBarRenderer
+	//renderers[menuState] = menuRenderer
+	//renderers[dialogState] = dialogRenderer
 }
 
 func drawingRenderer() {
@@ -33,22 +34,12 @@ func cursorRenderer() {
 	}
 }
 
-// func statusBarRenderer() {
-// 	// bottom of screen
-// 	_, height := termbox.Size()
-// 	barY := height - 1
-// 	barX := 0
-// 	ui.RenderBar('-', barY, statusBarFg, statusBarBg)
+func paletteRenderer() {
+	drawingRenderer()
 
-// 	ui.RenderText(fmt.Sprintf("Fg: X | Bg: X | Brush: X | Cursor: %03d,%03d | Size: %03d, %03d | Event: %#v",
-// 		cursorX, cursorY, drawing.width, drawing.height, lastMouseEvent), barX, barY, statusBarFg, statusBarBg)
-
-// 	// Render brush details
-// 	ui.RenderRune(' ', barX+4, barY, brushFg, brushFg)
-// 	ui.RenderRune(' ', barX+12, barY, brushBg, brushBg)
-// 	ui.RenderRune(brush, barX+23, barY, brushFg, brushBg)
-
-// }
+	// render palette
+	palette.Render()
+}
 
 func menuBarRenderer() {
 	// top of screen
