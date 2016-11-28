@@ -20,7 +20,7 @@ func registerEventHandlers() {
 
 	handlers[drawState] = drawingHandler
 	handlers[paletteState] = paletteHandler
-	//handlers[menuBarState] = menuBarHandler
+	handlers[modeState] = modeHandler
 	//handlers[menuState] = menuHandler
 	//handlers[dialogState] = dialogHandler
 }
@@ -164,5 +164,9 @@ func dialogHandler(event termbox.Event) {
 }
 
 func paletteHandler(ev termbox.Event) {
-	palette.Handle(ev)
+	paletteDialog.Handle(ev)
+}
+
+func modeHandler(ev termbox.Event) {
+	modeDialog.Handle(ev)
 }

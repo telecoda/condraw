@@ -5,7 +5,9 @@ import "github.com/nsf/termbox-go"
 var appState state
 var drawing *Drawing
 var statusBar *StatusBar
-var palette *PaletteDialog
+var paletteDialog Dialog
+var modeDialog Dialog
+var mode termbox.OutputMode
 
 func main() {
 	err := termbox.Init()
@@ -23,14 +25,18 @@ func main() {
 func Init() {
 	// init termbox settings
 	termbox.SetInputMode(termbox.InputEsc | termbox.InputMouse)
-	termbox.SetOutputMode(termbox.Output256)
+	//mode = termbox.OutputGrayscale
+	mode = termbox.Output256
+	//mode = termbox.Output216
+	termbox.SetOutputMode(mode)
 	//termbox.SetOutputMode(termbox.OutputGrayscale)
 	termWidth, termHeight := termbox.Size()
 	// drawing is 1 line less than terminal to allow for status bar
-	drawing = NewDrawing(termWidth, termHeight-1)
+	drawing = NewDrawing(termWidth, termHeight-1, mode)
 	// init UI
 	statusBar = InitStatusBar()
-	palette = newPaletteDialog()
+	paletteDialog = newPaletteDialog()
+	modeDialog = newModeDialog()
 
 	// default brush
 	brush = NewBrush(defaultBrushChar, defaultBrushFg, defaultBrushBg, 4, 2)

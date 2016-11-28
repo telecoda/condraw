@@ -10,6 +10,7 @@ func registerRenderers() {
 
 	renderers[drawState] = drawingRenderer
 	renderers[paletteState] = paletteRenderer
+	renderers[modeState] = modeRenderer
 	//renderers[menuBarState] = menuBarRenderer
 	//renderers[menuState] = menuRenderer
 	//renderers[dialogState] = dialogRenderer
@@ -37,8 +38,15 @@ func cursorRenderer() {
 func paletteRenderer() {
 	drawingRenderer()
 
-	// render palette
-	palette.Render()
+	// render palette dialog
+	paletteDialog.Render()
+}
+
+func modeRenderer() {
+	drawingRenderer()
+
+	// render mode dialog
+	modeDialog.Render()
 }
 
 func menuBarRenderer() {

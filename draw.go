@@ -24,12 +24,14 @@ var cursorBg = termbox.ColorRed
 //var bbw, bbh int
 
 type Drawing struct {
+	mode          termbox.OutputMode
 	width, height int
 	drawBuf       []termbox.Cell
 }
 
-func NewDrawing(width, height int) *Drawing {
+func NewDrawing(width, height int, mode termbox.OutputMode) *Drawing {
 	drawing := &Drawing{
+		mode:    mode,
 		width:   width,
 		height:  height,
 		drawBuf: make([]termbox.Cell, width*height),

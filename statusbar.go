@@ -18,11 +18,12 @@ func InitStatusBar() *StatusBar {
 	}
 
 	// append components
-	cursorStatus := newCursorStatus()
+	modeStatus := newModeStatus()
 	fgStatus := newForegroundStatus()
 	bgStatus := newBackgroundStatus()
 	brushStatus := newBrushStatus()
-	statusBar.children = append(statusBar.children, cursorStatus, fgStatus, bgStatus, brushStatus)
+	cursorStatus := newCursorStatus()
+	statusBar.children = append(statusBar.children, modeStatus, fgStatus, bgStatus, brushStatus, cursorStatus)
 	statusBar.positionAtBottom()
 
 	return statusBar
@@ -118,16 +119,18 @@ func (f ForegroundStatus) Handle(ev termbox.Event) {
 		// click on statusbar component
 		if ev.Key == termbox.MouseLeft {
 			// setup palette for Foreground
-			palette.Title = "Set Foreground"
-			palette.callback = f.SelectedCallback
-			setState(paletteState)
+			paletteDialog = newPaletteDialog()
+			paletteDialog.Show(drawing.mode, "Set Foreground", f.SelectedCallback)
+
 		}
 	}
 
 }
 
-func (f ForegroundStatus) SelectedCallback(colour termbox.Attribute) {
-	brush.fg = colour
+func (f ForegroundStatus) SelectedCallback(resultVar interface{}) {
+	if colour, ok := resultVar.(termbox.Attribute); ok {
+		brush.fg = colour
+	}
 }
 
 type BackgroundStatus struct {
@@ -159,16 +162,17 @@ func (b BackgroundStatus) Handle(ev termbox.Event) {
 		// click on statusbar component
 		if ev.Key == termbox.MouseLeft {
 			// setup palette for Background
-			palette.Title = "Set Background"
-			palette.callback = b.SelectedCallback
-			setState(paletteState)
+			paletteDialog = newPaletteDialog()
+			paletteDialog.Show(drawing.mode, "Set Background", b.SelectedCallback)
 		}
 	}
 
 }
 
-func (b BackgroundStatus) SelectedCallback(colour termbox.Attribute) {
-	brush.bg = colour
+func (b BackgroundStatus) SelectedCallback(resultVar interface{}) {
+	if colour, ok := resultVar.(termbox.Attribute); ok {
+		brush.bg = colour
+	}
 }
 
 type BrushStatus struct {
@@ -188,4 +192,55 @@ func (b BrushStatus) content() string {
 func (b BrushStatus) Render() {
 	ui.RenderText(b.content(), b.X, b.Y, statusBarFg, statusBarBg)
 	ui.RenderRune(brush.char, b.X+9, b.Y, brush.fg, brush.bg)
+}
+
+type ModeStatus struct {
+	ui.Component
+}
+
+func newModeStatus() ui.UIComponent {
+	comp := &ModeStatus{}
+	comp.Component.SetSize(len(comp.content()), 1)
+	return comp
+}
+
+func (m ModeStatus) content() string {
+	return "| Mode: 8 cols   |"
+}
+
+func (m ModeStatus) Render() {
+	modeStr := "| Mode: 8 cols   |"
+	switch mode {
+	case termbox.OutputNormal:
+		modeStr = "| Mode: 8 cols   |"
+	case termbox.OutputGrayscale:
+		modeStr = "| Mode: 24 grays |"
+	case termbox.Output256:
+		modeStr = "| Mode: 256 cols |"
+	case termbox.Output216:
+		modeStr = "| Mode: 216 cols |"
+	}
+	ui.RenderText(modeStr, m.X, m.Y, statusBarFg, statusBarBg)
+
+}
+
+func (m ModeStatus) Handle(ev termbox.Event) {
+	switch ev.Type {
+
+	case termbox.EventMouse:
+		// click on statusbar component
+		if ev.Key == termbox.MouseLeft {
+			// setup mode dialog
+			modeDialog.Show(drawing.mode, "Select mode", m.SelectedCallback)
+		}
+	}
+
+}
+
+func (m ModeStatus) SelectedCallback(resultVar interface{}) {
+	if selectedMode, ok := resultVar.(termbox.OutputMode); ok {
+		mode = selectedMode
+		drawing.mode = mode
+		termbox.SetOutputMode(mode)
+	}
 }
