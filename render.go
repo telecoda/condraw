@@ -11,6 +11,7 @@ func registerRenderers() {
 	renderers[drawState] = drawingRenderer
 	renderers[paletteState] = paletteRenderer
 	renderers[modeState] = modeRenderer
+	renderers[brushState] = brushRenderer
 	//renderers[menuBarState] = menuBarRenderer
 	//renderers[menuState] = menuRenderer
 	//renderers[dialogState] = dialogRenderer
@@ -33,6 +34,13 @@ func cursorRenderer() {
 	if drawing.inBounds(cursorX, cursorY) {
 		termbox.SetCell(cursorX, cursorY, cursorRune, cursorFg, cursorBg)
 	}
+}
+
+func brushRenderer() {
+	drawingRenderer()
+
+	// render brush dialog
+	brushDialog.Render()
 }
 
 func paletteRenderer() {

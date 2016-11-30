@@ -23,7 +23,8 @@ func InitStatusBar() *StatusBar {
 	bgStatus := newBackgroundStatus()
 	brushStatus := newBrushStatus()
 	cursorStatus := newCursorStatus()
-	statusBar.children = append(statusBar.children, modeStatus, fgStatus, bgStatus, brushStatus, cursorStatus)
+	gridStatus := newGridStatus()
+	statusBar.children = append(statusBar.children, modeStatus, fgStatus, bgStatus, brushStatus, cursorStatus, gridStatus)
 	statusBar.positionAtBottom()
 
 	return statusBar
@@ -90,6 +91,37 @@ func (c CursorStatus) Render() {
 	ui.RenderText(c.content(cursorX, cursorY), c.X, c.Y, statusBarFg, statusBarBg)
 }
 
+type GridStatus struct {
+	ui.Component
+}
+
+func newGridStatus() ui.UIComponent {
+	comp := &GridStatus{}
+	// calc rendered Size
+	comp.Component.SetSize(len(comp.content(drawing.displayGrid)), 1)
+	return comp
+}
+
+func (g GridStatus) content(displayGrid bool) string {
+	return fmt.Sprintf("| Grid: %t |", displayGrid)
+}
+
+func (g GridStatus) Render() {
+	ui.RenderText(g.content(drawing.displayGrid), g.X, g.Y, statusBarFg, statusBarBg)
+}
+
+func (g GridStatus) Handle(ev termbox.Event) {
+	switch ev.Type {
+
+	case termbox.EventMouse:
+		// click on statusbar component
+		if ev.Key == termbox.MouseLeft {
+			// toggle grid state
+			drawing.ToggleGrid()
+		}
+	}
+}
+
 type ForegroundStatus struct {
 	ui.Component
 }
@@ -124,7 +156,6 @@ func (f ForegroundStatus) Handle(ev termbox.Event) {
 
 		}
 	}
-
 }
 
 func (f ForegroundStatus) SelectedCallback(resultVar interface{}) {
@@ -166,7 +197,6 @@ func (b BackgroundStatus) Handle(ev termbox.Event) {
 			paletteDialog.Show(drawing.mode, "Set Background", b.SelectedCallback)
 		}
 	}
-
 }
 
 func (b BackgroundStatus) SelectedCallback(resultVar interface{}) {
@@ -192,6 +222,24 @@ func (b BrushStatus) content() string {
 func (b BrushStatus) Render() {
 	ui.RenderText(b.content(), b.X, b.Y, statusBarFg, statusBarBg)
 	ui.RenderRune(brush.char, b.X+9, b.Y, brush.fg, brush.bg)
+}
+
+func (b BrushStatus) Handle(ev termbox.Event) {
+	switch ev.Type {
+
+	case termbox.EventMouse:
+		// click on statusbar component
+		if ev.Key == termbox.MouseLeft {
+			// setup brush dialog
+			brushDialog.Show(drawing.mode, "Select mode", b.SelectedCallback)
+		}
+	}
+}
+
+func (b BrushStatus) SelectedCallback(resultVar interface{}) {
+	if selectedBrush, ok := resultVar.(rune); ok {
+		brush.char = selectedBrush
+	}
 }
 
 type ModeStatus struct {
@@ -234,7 +282,6 @@ func (m ModeStatus) Handle(ev termbox.Event) {
 			modeDialog.Show(drawing.mode, "Select mode", m.SelectedCallback)
 		}
 	}
-
 }
 
 func (m ModeStatus) SelectedCallback(resultVar interface{}) {

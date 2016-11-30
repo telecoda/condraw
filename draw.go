@@ -5,7 +5,65 @@ import termbox "github.com/nsf/termbox-go"
 var cursorX, cursorY int
 var eraser = ' '
 var brushRunes = []rune{' ', '░', '▒', '▓', '█'}
-var defaultBrushChar = '░'
+
+//var defaultBrushChar = '░'
+var defaultBrushChar = rune(' ')
+var defaultGridChar = rune(9633)
+
+// Rune: 8414 , ⃞
+// Rune: 8419 , ⃣
+// Rune: 8987 , ⌛
+// Rune: 9600 , ▀
+// Rune: 9601 , ▁
+// Rune: 9602 , ▂
+// Rune: 9603 , ▃
+// Rune: 9604 , ▄
+// Rune: 9605 , ▅
+// Rune: 9606 , ▆
+// Rune: 9607 , ▇
+// Rune: 9608 , █
+// Rune: 9609 , ▉
+// Rune: 9610 , ▊
+// Rune: 9611 , ▋
+// Rune: 9612 , ▌
+// Rune: 9613 , ▍
+// Rune: 9614 , ▎
+// Rune: 9615 , ▏
+// Rune: 9616 , ▐
+// Rune: 9617 , ░
+// Rune: 9618 , ▒
+// Rune: 9619 , ▓
+// Rune: 9620 , ▔
+// Rune: 9621 , ▕
+// Rune: 9622 , ▖
+// Rune: 9623 , ▗
+// Rune: 9624 , ▘
+// Rune: 9625 , ▙
+// Rune: 9626 , ▚
+// Rune: 9627 , ▛
+// Rune: 9628 , ▜
+// Rune: 9629 , ▝
+// Rune: 9630 , ▞
+// Rune: 9631 , ▟
+// Rune: 9632 , ■
+// Rune: 9633 , □
+// Rune: 9634 , ▢
+// Rune: 9635 , ▣
+// Rune: 9636 , ▤
+// Rune: 9637 , ▥
+// Rune: 9638 , ▦
+// Rune: 9639 , ▧
+// Rune: 9640 , ▨
+// Rune: 9641 , ▩
+// Rune: 9698 , ◢
+// Rune: 9699 , ◣
+// Rune: 9700 , ◤
+// Rune: 9701 , ◥
+// Rune: 10061 , ❍
+// Rune: 10063 , ❏
+// Rune: 10064 , ❐
+// Rune: 10065 , ❑
+// Rune: 10066 , ❒
 
 var brush *Brush
 
@@ -26,15 +84,17 @@ var cursorBg = termbox.ColorRed
 type Drawing struct {
 	mode          termbox.OutputMode
 	width, height int
+	displayGrid   bool
 	drawBuf       []termbox.Cell
 }
 
 func NewDrawing(width, height int, mode termbox.OutputMode) *Drawing {
 	drawing := &Drawing{
-		mode:    mode,
-		width:   width,
-		height:  height,
-		drawBuf: make([]termbox.Cell, width*height),
+		mode:        mode,
+		width:       width,
+		height:      height,
+		displayGrid: false,
+		drawBuf:     make([]termbox.Cell, width*height),
 	}
 
 	cursorX = 10
@@ -49,6 +109,10 @@ func (d *Drawing) defaultDrawing() {
 
 }
 
+func (d *Drawing) ToggleGrid() {
+	d.displayGrid = !d.displayGrid
+}
+
 func (d *Drawing) render() {
 	termbox.Clear(termbox.ColorWhite, termbox.ColorBlue)
 	// copy from drawing buffer to on screen buffer
@@ -59,7 +123,16 @@ func (d *Drawing) render() {
 		for y := 0; y <= uiHeight; y++ {
 			cell := d.GetCell(x, y)
 			if cell != nil {
-				termbox.SetCell(x, y, cell.Ch, cell.Fg, cell.Bg)
+				if d.displayGrid {
+					// if cell is empty draw grid char
+					if cell.Bg == 0 && cell.Fg == 0 && cell.Ch == 0 {
+						termbox.SetCell(x, y, defaultGridChar, termbox.ColorWhite, termbox.ColorBlack)
+					} else {
+						termbox.SetCell(x, y, defaultGridChar, cell.Fg, cell.Bg)
+					}
+				} else {
+					termbox.SetCell(x, y, cell.Ch, cell.Fg, cell.Bg)
+				}
 			}
 		}
 	}

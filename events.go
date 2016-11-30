@@ -21,6 +21,7 @@ func registerEventHandlers() {
 	handlers[drawState] = drawingHandler
 	handlers[paletteState] = paletteHandler
 	handlers[modeState] = modeHandler
+	handlers[brushState] = brushHandler
 	//handlers[menuState] = menuHandler
 	//handlers[dialogState] = dialogHandler
 }
@@ -84,6 +85,7 @@ var keys = rune('s')
 var keyS = rune('S')
 var keyd = rune('d')
 var keyD = rune('D')
+var keyg = rune('g')
 
 func drawingHandler(ev termbox.Event) {
 
@@ -123,6 +125,9 @@ func drawingHandler(ev termbox.Event) {
 		case keyS:
 			brush.paintToDrawing(drawing)
 			cursorDown()
+		case keyg:
+			drawing.ToggleGrid()
+			drawing.render()
 		}
 	case termbox.EventMouse:
 		lastMouseEvent = ev
@@ -160,7 +165,10 @@ func menuHandler(ev termbox.Event) {
 }
 
 func dialogHandler(event termbox.Event) {
+}
 
+func brushHandler(ev termbox.Event) {
+	brushDialog.Handle(ev)
 }
 
 func paletteHandler(ev termbox.Event) {

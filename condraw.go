@@ -7,6 +7,7 @@ var drawing *Drawing
 var statusBar *StatusBar
 var paletteDialog Dialog
 var modeDialog Dialog
+var brushDialog Dialog
 var mode termbox.OutputMode
 
 func main() {
@@ -35,11 +36,12 @@ func Init() {
 	drawing = NewDrawing(termWidth, termHeight-1, mode)
 	// init UI
 	statusBar = InitStatusBar()
-	paletteDialog = newPaletteDialog()
+	brushDialog = newBrushDialog()
 	modeDialog = newModeDialog()
+	paletteDialog = newPaletteDialog()
 
 	// default brush
-	brush = NewBrush(defaultBrushChar, defaultBrushFg, defaultBrushBg, 4, 2)
+	brush = NewBrush(defaultBrushChar, defaultBrushFg, defaultBrushBg, 1, 1)
 
 	// register functions
 	registerEventHandlers()

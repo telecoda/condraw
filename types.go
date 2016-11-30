@@ -6,4 +6,5 @@ const (
 	drawState state = iota
 	paletteState
 	modeState
+	brushState
 )

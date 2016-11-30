@@ -5,7 +5,6 @@ import (
 
 	termbox "github.com/nsf/termbox-go"
 	"github.com/telecoda/condraw/ui"
-	"github.com/y0ssar1an/q"
 )
 
 type Dialog interface {
@@ -237,7 +236,7 @@ type ModeDialog struct {
 }
 
 func newModeDialog() Dialog {
-	modeDialog = &ModeDialog{}
+	modeDialog := &ModeDialog{}
 
 	return modeDialog
 }
@@ -277,7 +276,6 @@ func (m *ModeDialog) selectMode(y int) {
 	modeY := y - m.Y + 1
 	index := termbox.OutputMode(modeY)
 	if index >= termbox.OutputNormal && index <= termbox.OutputGrayscale {
-		q.Q(index)
 		m.callback(index)
 	}
 }
@@ -287,4 +285,67 @@ func (m *ModeDialog) Show(mode termbox.OutputMode, title string, callback func(r
 	m.Title = title
 	m.callback = callback
 	setState(modeState)
+}
+
+type BrushDialog struct {
+	brush *Brush
+	ui.Component
+	Title    string
+	callback func(resultVar interface{})
+}
+
+func newBrushDialog() Dialog {
+	brushDialog := &BrushDialog{}
+
+	return brushDialog
+}
+
+var totalRunes = 2048
+var runesOnLine = 96
+
+func (b *BrushDialog) Render() {
+	// make sure component is centred
+	termWidth, termHeight := termbox.Size()
+	cx := termWidth / 2
+	cy := termHeight / 2
+
+	offsetX := runesOnLine / 2
+	offsetY := totalRunes / runesOnLine / 2
+	b.X = cx - offsetX
+	b.Y = cy - offsetY
+	for i := rune(0); i < rune(totalRunes); i++ {
+		bx := int(i) % runesOnLine
+		by := int(i) / runesOnLine
+		ui.RenderRune(i, b.X+bx, b.Y+by, statusBarFg, statusBarBg)
+	}
+	ui.RenderText("--------------brush-------------", b.X, b.Y-1, statusBarFg, statusBarBg)
+}
+
+func (b *BrushDialog) Handle(ev termbox.Event) {
+	switch ev.Type {
+
+	case termbox.EventMouse:
+		// click on mode dialog
+		if ev.Key == termbox.MouseLeft {
+			b.selectBrush(ev.MouseX, ev.MouseY)
+			setState(drawState)
+		}
+	}
+}
+
+func (b *BrushDialog) selectBrush(x, y int) {
+	brushY := y - b.Y
+	brushX := x - b.X
+	index := rune(brushY*runesOnLine + brushX)
+
+	if index >= rune(0) && index <= rune(totalRunes) {
+		b.callback(index)
+	}
+}
+
+func (b *BrushDialog) Show(mode termbox.OutputMode, title string, callback func(resultVar interface{})) {
+	b.brush = brush
+	b.Title = title
+	b.callback = callback
+	setState(brushState)
 }
