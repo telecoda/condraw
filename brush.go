@@ -2,7 +2,6 @@ package main
 
 import (
 	termbox "github.com/nsf/termbox-go"
-	"github.com/y0ssar1an/q"
 )
 
 type Brush struct {
@@ -14,31 +13,42 @@ type Brush struct {
 }
 
 func NewBrush(char rune, fg, bg termbox.Attribute, width, height int) *Brush {
-	brush := &Brush{
-		char:    char,
-		fg:      fg,
-		bg:      bg,
-		width:   width,
-		height:  height,
-		drawing: NewDrawing(2, 2, mode),
+	b := &Brush{
+		char:   char,
+		fg:     fg,
+		bg:     bg,
+		width:  width,
+		height: height,
 	}
 
-	brush.initDrawing()
+	b.fillBrush()
 
-	return brush
+	return b
 }
 
-// temp code to define a brush internally as a drawing
-func (b *Brush) initDrawing() {
-
-	brushDrawing := b.drawing
-	for x := 0; x <= b.width; x++ {
-		for y := 0; y <= b.height; y++ {
-			q.Q(x, y)
-			brushDrawing.drawBuf[brushDrawing.width*y+x] = termbox.Cell{Ch: rune('B'), Fg: termbox.ColorGreen, Bg: termbox.ColorYellow}
+// fillBrush fills brush with current values
+func (b *Brush) fillBrush() {
+	b.drawing = NewDrawing(b.width, b.height, mode)
+	for x := 0; x < b.width; x++ {
+		for y := 0; y < b.height; y++ {
+			b.drawing.drawBuf[b.drawing.width*y+x] = termbox.Cell{Ch: b.char, Fg: b.fg, Bg: b.bg}
 		}
 	}
-	q.Q(b)
+}
+
+func (b *Brush) setChar(char rune) {
+	b.char = char
+	b.fillBrush()
+}
+
+func (b *Brush) setBG(bg termbox.Attribute) {
+	b.bg = bg
+	b.fillBrush()
+}
+
+func (b *Brush) setFG(fg termbox.Attribute) {
+	b.fg = fg
+	b.fillBrush()
 }
 
 func (b *Brush) getBrushCell(x, y int) termbox.Cell {

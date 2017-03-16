@@ -24,7 +24,7 @@ func InitStatusBar() *StatusBar {
 	brushStatus := newBrushStatus()
 	cursorStatus := newCursorStatus()
 	gridStatus := newGridStatus()
-	statusBar.children = append(statusBar.children, modeStatus, fgStatus, bgStatus, brushStatus, cursorStatus, gridStatus)
+	statusBar.children = append(statusBar.children, fgStatus, bgStatus, brushStatus, modeStatus, gridStatus, cursorStatus)
 	statusBar.positionAtBottom()
 
 	return statusBar
@@ -160,7 +160,7 @@ func (f ForegroundStatus) Handle(ev termbox.Event) {
 
 func (f ForegroundStatus) SelectedCallback(resultVar interface{}) {
 	if colour, ok := resultVar.(termbox.Attribute); ok {
-		brush.fg = colour
+		brush.setFG(colour)
 	}
 }
 
@@ -201,7 +201,7 @@ func (b BackgroundStatus) Handle(ev termbox.Event) {
 
 func (b BackgroundStatus) SelectedCallback(resultVar interface{}) {
 	if colour, ok := resultVar.(termbox.Attribute); ok {
-		brush.bg = colour
+		brush.setBG(colour)
 	}
 }
 
@@ -216,7 +216,7 @@ func newBrushStatus() ui.UIComponent {
 }
 
 func (b BrushStatus) content() string {
-	return "| Brush: x |"
+	return fmt.Sprintf("| Brush: x (+%2d-,+%2d-)|", brush.width, brush.height)
 }
 
 func (b BrushStatus) Render() {
@@ -231,14 +231,15 @@ func (b BrushStatus) Handle(ev termbox.Event) {
 		// click on statusbar component
 		if ev.Key == termbox.MouseLeft {
 			// setup brush dialog
+
 			brushDialog.Show(drawing.mode, "Select mode", b.SelectedCallback)
 		}
 	}
 }
 
 func (b BrushStatus) SelectedCallback(resultVar interface{}) {
-	if selectedBrush, ok := resultVar.(rune); ok {
-		brush.char = selectedBrush
+	if selectedBrushChar, ok := resultVar.(rune); ok {
+		brush.setChar(selectedBrushChar)
 	}
 }
 
