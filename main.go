@@ -35,7 +35,7 @@ func Init() {
 	// drawing is 1 line less than terminal to allow for status bar
 	drawing = NewDrawing(termWidth, termHeight-1, mode)
 	// default brush
-	brush = NewBrush(defaultBrushChar, defaultBrushFg, defaultBrushBg, 3, 3)
+	brush = NewBrush(defaultBrushChar, defaultBrushFg, defaultBrushBg, 4, 2)
 
 	// init UI
 	statusBar = InitStatusBar()

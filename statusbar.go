@@ -216,7 +216,7 @@ func newBrushStatus() ui.UIComponent {
 }
 
 func (b BrushStatus) content() string {
-	return fmt.Sprintf("| Brush: x (+%2d-,+%2d-)|", brush.width, brush.height)
+	return fmt.Sprintf("| Brush: x (size:%d) |", brush.width)
 }
 
 func (b BrushStatus) Render() {

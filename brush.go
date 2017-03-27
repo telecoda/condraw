@@ -4,6 +4,10 @@ import (
 	termbox "github.com/nsf/termbox-go"
 )
 
+const (
+	MAX_BRUSH_SIZE = 20
+)
+
 type Brush struct {
 	char          rune
 	fg            termbox.Attribute
@@ -49,6 +53,20 @@ func (b *Brush) setBG(bg termbox.Attribute) {
 func (b *Brush) setFG(fg termbox.Attribute) {
 	b.fg = fg
 	b.fillBrush()
+}
+
+func (b *Brush) increaseSize() {
+	if b.height < MAX_BRUSH_SIZE {
+		b.height++
+		b.width = b.height * 2
+	}
+}
+
+func (b *Brush) decreaseSize() {
+	if b.height > 1 {
+		b.height--
+		b.width = b.height * 2
+	}
 }
 
 func (b *Brush) getBrushCell(x, y int) termbox.Cell {

@@ -86,6 +86,8 @@ var keyS = rune('S')
 var keyd = rune('d')
 var keyD = rune('D')
 var keyg = rune('g')
+var keyPlus = rune('=')
+var keyMinus = rune('-')
 
 func drawingHandler(ev termbox.Event) {
 
@@ -128,6 +130,10 @@ func drawingHandler(ev termbox.Event) {
 		case keyg:
 			drawing.ToggleGrid()
 			drawing.render()
+		case keyPlus:
+			brush.increaseSize()
+		case keyMinus:
+			brush.decreaseSize()
 		}
 	case termbox.EventMouse:
 		lastMouseEvent = ev
