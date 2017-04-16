@@ -1,6 +1,11 @@
 package main
 
-import termbox "github.com/nsf/termbox-go"
+import (
+	"fmt"
+	"os"
+
+	termbox "github.com/nsf/termbox-go"
+)
 
 var cursorX, cursorY int
 var eraser = ' '
@@ -137,6 +142,40 @@ func (d *Drawing) render() {
 		}
 	}
 
+}
+
+// save drawing to disk
+func (d *Drawing) save(filename string) error {
+
+	file, err := os.Create(filename)
+	if err != nil {
+		fmt.Printf("TEMP: error opening file: %s\n", err)
+		return err
+	}
+
+	uiWidth, uiHeight := termbox.Size()
+
+	for x := 0; x <= uiWidth; x++ {
+		for y := 0; y <= uiHeight; y++ {
+			cell := d.GetCell(x, y)
+			if cell != nil {
+				file.Write([]byte(string(cell.Fg)))
+				file.Write([]byte(string(cell.Bg)))
+				file.Write([]byte(string(cell.Ch)))
+			}
+		}
+		// newline
+		file.Write([]byte("\n"))
+	}
+
+	file.Close()
+
+	return nil
+}
+
+// load drawing from disk
+func (d *Drawing) load(filename string) error {
+	return nil
 }
 
 func (d *Drawing) GetCell(x, y int) *termbox.Cell {

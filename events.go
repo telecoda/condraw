@@ -97,6 +97,11 @@ func drawingHandler(ev termbox.Event) {
 		if ev.Key == termbox.KeyTab {
 			//setState(menuBarState)
 		}
+		if ev.Key == termbox.KeyCtrlS {
+			// save drawing
+			drawing.save("/Users/robbaines/go/src/github.com/telecoda/condraw/test-drawing.txt")
+		}
+
 		if ev.Key == termbox.KeySpace {
 			brush.paintToDrawing(drawing)
 			return
