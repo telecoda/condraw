@@ -1,92 +1,153 @@
 package ui
 
 import (
-	"image"
+	"fmt"
 
-	termbox "github.com/nsf/termbox-go"
+	cui "github.com/jroimartin/gocui"
 )
 
-/* This code is slowly lapsing into an entire UI rendering framework
-   that is not my objective, so I'm putting on the brakes and getting back
-   to the features of the drawing program, for now... */
+const (
+	// Drawing
+	Drawing = "Drawing"
+)
 
-type UIComponent interface {
-	Render()
-	SetPosition(x, y int)
-	GetPosition() (int, int)
-	SetSize(width, height int)
-	Width() int
-	InBounds(x, y int) bool
-	Handle(event termbox.Event)
-}
+var (
+	curView = -1
+	idxView = 0
+)
 
-func RenderBar(r rune, y int, fg, bg termbox.Attribute) {
-	width, _ := termbox.Size()
-	for x := 0; x < width; x++ {
-		termbox.SetCell(x, y, r, fg, bg)
+func Init() (*cui.Gui, error) {
+	g, err := cui.NewGui(cui.OutputNormal)
+	if err != nil {
+		return nil, err
 	}
-}
+	g.Mouse = true
+	g.Highlight = true
+	g.SelFgColor = cui.ColorRed
+	g.SelBgColor = cui.ColorWhite
+	g.FgColor = cui.ColorBlack
+	g.BgColor = cui.ColorWhite
 
-func RenderText(text string, x, y int, fg, bg termbox.Attribute) {
-	for i, rune := range text {
-		termbox.SetCell(x+i, y, rune, fg, bg)
+	g.SetManagerFunc(layout)
+
+	// init menu handlers
+	if err := initMenuHandlers(g); err != nil {
+		return nil, err
 	}
+
+	// init key bindings
+	if err := initKeyBindings(g); err != nil {
+		return nil, err
+	}
+
+	// init drawing
+	if err := layoutDrawing(g); err != nil {
+		return nil, err
+	}
+	return g, nil
+
 }
 
-func RenderRune(r rune, x, y int, fg, bg termbox.Attribute) {
-	// probably a pointless wrapper function..
-	termbox.SetCell(x, y, r, fg, bg)
-}
+func layout(g *cui.Gui) error {
 
-func RenderRect(rect image.Rectangle, colour termbox.Attribute) {
-	min := rect.Min
-	max := rect.Max
-	for x := min.X; x < max.X; x++ {
-		for y := min.Y; y < max.Y; y++ {
-			termbox.SetCell(x, y, rune(' '), colour, colour)
+	// init top menubar
+	menuX := 0
+	for _, menu := range menus {
+		// layout menubar items
+		if err := layoutMenuBar(g, menu, menuX); err != nil {
+			return err
 		}
+		menuX += len(menu) + 2
 	}
+	return nil
 }
 
-type Component struct {
-	X, Y          int
-	width, height int
-	//parent        *Component
-	children []Component
-}
+func layoutMenuBar(g *cui.Gui, name string, xCoord int) error {
 
-func (c *Component) SetPosition(x, y int) {
-	c.X = x
-	c.Y = y
-}
-
-func (c *Component) GetPosition() (int, int) {
-	return c.X, c.Y
-}
-
-func (c *Component) SetSize(width, height int) {
-	c.width = width
-	c.height = height
-}
-
-func (c *Component) Width() int {
-	return c.width
-}
-func (c *Component) Height() int {
-	return c.height
-}
-
-func (c *Component) InBounds(x, y int) bool {
-	leftX := c.X
-	rightX := c.X + c.width
-	topY := c.Y
-	bottomY := c.Y + c.height
-	if x >= leftX && x < rightX && y >= topY && y < bottomY {
-		return true
+	if v, err := g.SetView(name, xCoord, -1, xCoord+len(name)+2, 1); err != nil {
+		if err != cui.ErrUnknownView {
+			return err
+		}
+		// init view content
+		fmt.Fprintln(v, name)
+		v.FgColor = cui.ColorBlack
+		v.BgColor = cui.ColorWhite
+		v.Frame = false
+		g.SetViewOnTop(name)
 	}
-	return false
+	return nil
 }
 
-func (c *Component) Handle(event termbox.Event) {
+func layoutDrawing(g *cui.Gui) error {
 
+	width, height := g.Size()
+
+	if v, err := g.SetView(Drawing, 0, 1, width, height-1); err != nil {
+		if err != cui.ErrUnknownView {
+			return err
+		}
+		// init view content
+		v.FgColor = cui.ColorWhite
+		v.BgColor = cui.ColorBlue
+		v.Frame = true
+		v.Clear()
+	}
+
+	return nil
+}
+
+func initKeyBindings(g *cui.Gui) error {
+	// global quit key
+	if err := g.SetKeybinding("", cui.KeyCtrlC, cui.ModNone, quit); err != nil {
+		return err
+	}
+
+	if err := g.SetKeybinding("", cui.KeyTab, cui.ModNone,
+		func(g *cui.Gui, v *cui.View) error {
+			return nextView(g, true)
+		}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func nextView(g *cui.Gui, disableCurrent bool) error {
+	next := curView + 1
+	vs := g.Views()
+	views := make([]string, len(vs))
+	for i, view := range vs {
+		views[i] = view.Name()
+	}
+	if next > len(views)-1 {
+		next = 0
+	}
+
+	if _, err := g.SetCurrentView(views[next]); err != nil {
+		return err
+	}
+
+	curView = next
+	return nil
+}
+
+func initMenuHandlers(g *cui.Gui) error {
+
+	// file menu
+	if err := initMenu(g, FileMenu, fileMenu, fileMenuItems, 0, 0); err != nil {
+		return err
+	}
+	// edit menu
+	if err := initMenu(g, EditMenu, editMenu, editMenuItems, 6, 0); err != nil {
+		return err
+	}
+	// about menu
+	if err := initMenu(g, AboutMenu, aboutMenu, aboutMenuItems, 12, 0); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func quit(g *cui.Gui, v *cui.View) error {
+	return cui.ErrQuit
 }

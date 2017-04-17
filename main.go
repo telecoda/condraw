@@ -1,51 +1,20 @@
 package main
 
-import "github.com/nsf/termbox-go"
+import (
+	"log"
 
-var appState state
-var drawing *Drawing
-var statusBar *StatusBar
-var paletteDialog Dialog
-var modeDialog Dialog
-var brushDialog Dialog
-var mode termbox.OutputMode
+	"github.com/jroimartin/gocui"
+	"github.com/telecoda/condraw/ui"
+)
 
 func main() {
-	err := termbox.Init()
+	gui, err := ui.Init()
 	if err != nil {
-		panic(err)
+		log.Panicln(err)
 	}
-	defer termbox.Close()
+	defer gui.Close()
 
-	Init()
-
-	eventLoop()
-
-}
-
-func Init() {
-	// init termbox settings
-	termbox.SetInputMode(termbox.InputEsc | termbox.InputMouse)
-	//mode = termbox.OutputGrayscale
-	mode = termbox.Output256
-	//mode = termbox.Output216
-	termbox.SetOutputMode(mode)
-	//termbox.SetOutputMode(termbox.OutputGrayscale)
-	termWidth, termHeight := termbox.Size()
-	// drawing is 1 line less than terminal to allow for status bar
-	drawing = NewDrawing(termWidth, termHeight-1, mode)
-	// default brush
-	brush = NewBrush(defaultBrushChar, defaultBrushFg, defaultBrushBg, 4, 2)
-
-	// init UI
-	statusBar = InitStatusBar()
-	brushDialog = newBrushDialog()
-	modeDialog = newModeDialog()
-	paletteDialog = newPaletteDialog()
-
-	// register functions
-	registerEventHandlers()
-	registerRenderers()
-	setState(drawState)
-
+	if err := gui.MainLoop(); err != nil && err != gocui.ErrQuit {
+		log.Panicln(err)
+	}
 }
