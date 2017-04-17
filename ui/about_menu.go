@@ -47,6 +47,8 @@ func aboutHandler(g *cui.Gui, v *cui.View) error {
 		// add an ok button
 		okButton := NewButtonWidget("OK", hWidth+4, hHeight+4, "OK", aboutOKHandler)
 		okButton.Layout(g)
+
+		modalDisplayed()
 	}
 
 	return nil
@@ -56,6 +58,8 @@ func aboutOKHandler(g *cui.Gui, v *cui.View) error {
 	// delete menuItem view
 	g.DeleteView(v.Name())
 	g.DeleteView("aboutDialog")
+
+	modalClosed()
 
 	return nil
 }

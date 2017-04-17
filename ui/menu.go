@@ -29,6 +29,9 @@ func initMenu(g *cui.Gui, menuName string, itemNames []string, itemMap map[strin
 	// init menu handler func
 	menuBarClickHandler := func(g *cui.Gui, v *cui.View) error {
 
+		if isModalDisplayed() {
+			return nil
+		}
 		// size menu based upon longest description
 		maxWidth := 0
 		for _, item := range itemNames {

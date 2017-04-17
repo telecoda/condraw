@@ -14,6 +14,8 @@ const (
 var (
 	curView = -1
 	idxView = 0
+
+	modalDisp = false
 )
 
 func Init() (*cui.Gui, error) {
@@ -46,6 +48,18 @@ func Init() (*cui.Gui, error) {
 	}
 	return g, nil
 
+}
+
+func modalDisplayed() {
+	modalDisp = true
+}
+
+func modalClosed() {
+	modalDisp = false
+}
+
+func isModalDisplayed() bool {
+	return modalDisp
 }
 
 func layout(g *cui.Gui) error {
