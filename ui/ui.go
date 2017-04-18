@@ -12,10 +12,10 @@ const (
 )
 
 var (
-	curView = -1
-	idxView = 0
-
+	curView   = -1
+	idxView   = 0
 	modalDisp = false
+	uiDisp    = false
 )
 
 func Init() (*cui.Gui, error) {
@@ -42,10 +42,6 @@ func Init() (*cui.Gui, error) {
 		return nil, err
 	}
 
-	// init drawing
-	if err := layoutDrawing(g); err != nil {
-		return nil, err
-	}
 	return g, nil
 
 }
@@ -64,21 +60,30 @@ func isModalDisplayed() bool {
 
 func layout(g *cui.Gui) error {
 
-	// init top menubar
-	menuX := 0
-	for _, menu := range menus {
-		// layout menubar items
-		if err := layoutMenuBar(g, menu, menuX); err != nil {
-			return err
-		}
-		menuX += len(menu) + 2
+	// init drawing
+	if err := layoutDrawing(g); err != nil {
+		return err
 	}
+	if uiDisp {
+		// init top menubar
+		menuX := 3
+		for _, menu := range menus {
+			// layout menubar items
+			if err := layoutMenuBar(g, menu, menuX); err != nil {
+				return err
+			}
+			menuX += len(menu) + 4
+		}
+	}
+
+	listViews("layout", g)
+
 	return nil
 }
 
 func layoutMenuBar(g *cui.Gui, name string, xCoord int) error {
 
-	if v, err := g.SetView(name, xCoord, -1, xCoord+len(name)+2, 1); err != nil {
+	if v, err := g.SetView(name, xCoord, -1, xCoord+len(name)+4, 1); err != nil {
 		if err != cui.ErrUnknownView {
 			return err
 		}
@@ -87,7 +92,7 @@ func layoutMenuBar(g *cui.Gui, name string, xCoord int) error {
 		v.FgColor = cui.ColorBlack
 		v.BgColor = cui.ColorWhite
 		v.Frame = false
-		g.SetViewOnTop(name)
+		//g.SetViewOnTop(name)
 	}
 	return nil
 }
@@ -95,15 +100,26 @@ func layoutMenuBar(g *cui.Gui, name string, xCoord int) error {
 func layoutDrawing(g *cui.Gui) error {
 
 	width, height := g.Size()
+	x := -1
+	y := -1
+	frame := false
+	if uiDisp {
+		// allow for menu bar
+		height -= 1
+		width -= 2
+		y += 2
+		x += 1
+		frame = true
+	}
 
-	if v, err := g.SetView(Drawing, 0, 1, width, height-1); err != nil {
+	if v, err := g.SetView(Drawing, x, y, width, height); err != nil {
 		if err != cui.ErrUnknownView {
 			return err
 		}
 		// init view content
 		v.FgColor = cui.ColorWhite
 		v.BgColor = cui.ColorBlue
-		v.Frame = true
+		v.Frame = frame
 		v.Clear()
 	}
 
@@ -113,6 +129,10 @@ func layoutDrawing(g *cui.Gui) error {
 func initKeyBindings(g *cui.Gui) error {
 	// global quit key
 	if err := g.SetKeybinding("", cui.KeyCtrlC, cui.ModNone, quit); err != nil {
+		return err
+	}
+	// toggle UI
+	if err := g.SetKeybinding("", cui.KeyCtrlM, cui.ModNone, toggleUI); err != nil {
 		return err
 	}
 
@@ -147,15 +167,15 @@ func nextView(g *cui.Gui, disableCurrent bool) error {
 func initMenuHandlers(g *cui.Gui) error {
 
 	// file menu
-	if err := initMenu(g, FileMenu, fileMenu, fileMenuItems, 0, 0); err != nil {
+	if err := initMenu(g, FileMenu, fileMenu, fileMenuItems, 3, 1); err != nil {
 		return err
 	}
 	// edit menu
-	if err := initMenu(g, EditMenu, editMenu, editMenuItems, 6, 0); err != nil {
+	if err := initMenu(g, EditMenu, editMenu, editMenuItems, 11, 1); err != nil {
 		return err
 	}
 	// about menu
-	if err := initMenu(g, AboutMenu, aboutMenu, aboutMenuItems, 12, 0); err != nil {
+	if err := initMenu(g, AboutMenu, aboutMenu, aboutMenuItems, 19, 1); err != nil {
 		return err
 	}
 
@@ -164,4 +184,14 @@ func initMenuHandlers(g *cui.Gui) error {
 
 func quit(g *cui.Gui, v *cui.View) error {
 	return cui.ErrQuit
+}
+
+func toggleUI(g *cui.Gui, v *cui.View) error {
+	uiDisp = !uiDisp
+	// delete all views
+	views := g.Views()
+	for _, view := range views {
+		g.DeleteView(view.Name())
+	}
+	return layout(g)
 }

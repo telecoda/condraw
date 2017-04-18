@@ -29,6 +29,7 @@ func initMenu(g *cui.Gui, menuName string, itemNames []string, itemMap map[strin
 	// init menu handler func
 	menuBarClickHandler := func(g *cui.Gui, v *cui.View) error {
 
+		listCurrentView("menubarClicker", g, v)
 		if isModalDisplayed() {
 			return nil
 		}
@@ -42,7 +43,7 @@ func initMenu(g *cui.Gui, menuName string, itemNames []string, itemMap map[strin
 		}
 		// draw menu items relative to original menu
 		menuItems := v.Name() + "MenuItems"
-		if v, err := g.SetView(menuItems, x+1, y+1, x+maxWidth, y+len(itemNames)+2); err != nil {
+		if v, err := g.SetView(menuItems, x, y, x+maxWidth-1, y+len(itemNames)+1); err != nil {
 			if err != cui.ErrUnknownView {
 				return err
 			}
@@ -72,6 +73,8 @@ func initMenu(g *cui.Gui, menuName string, itemNames []string, itemMap map[strin
 
 	// init menu item handler
 	menuItemClickHandler := func(g *cui.Gui, v *cui.View) error {
+
+		listCurrentView("menuitemClicker", g, v)
 
 		if _, err := g.SetCurrentView(v.Name()); err != nil {
 			return err

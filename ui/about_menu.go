@@ -38,14 +38,14 @@ func aboutHandler(g *cui.Gui, v *cui.View) error {
 	hWidth := width / 2
 	hHeight := height / 2
 	dWidth := 26
-	dHeight := 7
-	if v, err := g.SetView("aboutDialog", hWidth-dWidth/2, hHeight-dHeight/2, hWidth+dWidth, hHeight+dHeight); err != nil {
+	dHeight := 6
+	if v, err := g.SetView("aboutDialog", hWidth-dWidth/2-1, hHeight-dHeight/2-1, hWidth+dWidth+1, hHeight+dHeight+1); err != nil {
 		if err != cui.ErrUnknownView {
 			return err
 		}
 		fmt.Fprintln(v, aboutDialogText)
 		// add an ok button
-		okButton := NewButtonWidget("OK", hWidth+4, hHeight+4, "OK", aboutOKHandler)
+		okButton := NewButtonWidget("OK", hWidth+4, hHeight+4, " OK ", aboutOKHandler)
 		okButton.Layout(g)
 
 		modalDisplayed()
