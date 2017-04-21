@@ -4,11 +4,12 @@ import (
 	"fmt"
 
 	cui "github.com/jroimartin/gocui"
+	termbox "github.com/nsf/termbox-go"
 )
 
 const (
 	// Drawing
-	Drawing = "Drawing"
+	DrawingView = "Drawing"
 )
 
 var (
@@ -76,7 +77,7 @@ func layout(g *cui.Gui) error {
 		}
 	}
 
-	listViews("layout", g)
+	// listViews("layout", g)
 
 	return nil
 }
@@ -112,7 +113,7 @@ func layoutDrawing(g *cui.Gui) error {
 		frame = true
 	}
 
-	if v, err := g.SetView(Drawing, x, y, width, height); err != nil {
+	if v, err := g.SetView(DrawingView, x, y, width, height); err != nil {
 		if err != cui.ErrUnknownView {
 			return err
 		}
@@ -121,6 +122,15 @@ func layoutDrawing(g *cui.Gui) error {
 		v.BgColor = cui.ColorBlue
 		v.Frame = frame
 		v.Clear()
+
+		// draw cell
+		if err := g.SetKeybinding(DrawingView, cui.MouseLeft, cui.Modifier(termbox.ModMotion), drawingClickHandler); err != nil {
+			return err
+		}
+		if err := g.SetKeybinding(DrawingView, cui.MouseLeft, cui.ModNone, drawingClickHandler); err != nil {
+			return err
+		}
+
 	}
 
 	return nil
@@ -132,16 +142,10 @@ func initKeyBindings(g *cui.Gui) error {
 		return err
 	}
 	// toggle UI
-	if err := g.SetKeybinding("", cui.KeyCtrlM, cui.ModNone, toggleUI); err != nil {
+	if err := g.SetKeybinding("", cui.KeyTab, cui.ModNone, toggleUI); err != nil {
 		return err
 	}
 
-	if err := g.SetKeybinding("", cui.KeyTab, cui.ModNone,
-		func(g *cui.Gui, v *cui.View) error {
-			return nextView(g, true)
-		}); err != nil {
-		return err
-	}
 	return nil
 }
 
@@ -188,10 +192,21 @@ func quit(g *cui.Gui, v *cui.View) error {
 
 func toggleUI(g *cui.Gui, v *cui.View) error {
 	uiDisp = !uiDisp
-	// delete all views
+	// delete all views (except drawing)
 	views := g.Views()
 	for _, view := range views {
-		g.DeleteView(view.Name())
+		if view.Name() != DrawingView {
+			g.DeleteView(view.Name())
+		}
 	}
+	return layout(g)
+}
+
+func drawingClickHandler(g *cui.Gui, v *cui.View) error {
+
+	// draw at cursor
+	v.EditDelete(true)
+	v.EditWrite('X')
+
 	return layout(g)
 }
