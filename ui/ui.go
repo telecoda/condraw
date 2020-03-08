@@ -123,7 +123,6 @@ func layoutDrawing(g *cui.Gui) error {
 		v.Frame = frame
 		v.Clear()
 
-		// draw cell
 		if err := g.SetKeybinding(DrawingView, cui.MouseLeft, cui.Modifier(termbox.ModMotion), drawingClickHandler); err != nil {
 			return err
 		}
@@ -206,7 +205,7 @@ func drawingClickHandler(g *cui.Gui, v *cui.View) error {
 
 	// draw at cursor
 	v.EditDelete(true)
-	v.EditWrite('X')
+	v.EditWrite('d')
 
 	return layout(g)
 }

@@ -1,6 +1,9 @@
 package ui
 
 import (
+	"bufio"
+	"io/ioutil"
+
 	cui "github.com/jroimartin/gocui"
 )
 
@@ -34,11 +37,33 @@ func showNewFileDialog(g *cui.Gui, v *cui.View) error {
 }
 
 func showLoadFileDialog(g *cui.Gui, v *cui.View) error {
-	return nil
+	// get drawing view
+	dv, err := g.View(DrawingView)
+	if err != nil {
+		return err
+	}
+	// read view state from file
+	data, err := ioutil.ReadFile("./drawing.txt")
+	if err != nil {
+		return err
+	}
+	_, err = dv.Write(data)
+	return err
 }
 
 func showSaveFileDialog(g *cui.Gui, v *cui.View) error {
-	return nil
+	// get drawing view
+	dv, err := g.View(DrawingView)
+	if err != nil {
+		return err
+	}
+	// write view state to file
+	buf := bufio.NewReader(dv)
+	data, err := ioutil.ReadAll(buf)
+	if err != nil {
+		return err
+	}
+	return ioutil.WriteFile("./drawing.txt", data, 0644)
 }
 
 func showSaveAsFileDialog(g *cui.Gui, v *cui.View) error {
