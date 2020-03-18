@@ -9,7 +9,6 @@ It uses the [termbox-go](https://github.com/nsf/termbox-go) library for renderin
 <font color="red">**
 Note: this project is very much work in progress at the moment, watch this space..**</font>
 
-
 ## Building
 First fetch all the dependencies:
 
